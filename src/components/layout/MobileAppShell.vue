@@ -9,7 +9,6 @@
 <style scoped>
 .shell {
   min-height: 100dvh;
-  padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
   background:
     radial-gradient(circle at 15% 10%, rgba(193, 241, 140, 0.55), transparent 45%),
     radial-gradient(circle at 80% 10%, rgba(255, 232, 135, 0.5), transparent 40%),
@@ -18,7 +17,7 @@
 
 .device {
   width: 100%;
-  max-width: 375px;
+  max-width: 400px;
   min-height: 100dvh;
   margin: 0 auto;
   background: var(--color-surface);
