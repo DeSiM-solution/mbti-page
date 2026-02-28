@@ -1,0 +1,9 @@
+:root {
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fbf5;
+  --color-border-soft: #d9e2d8;
+  --color-text-primary: #1f2d1f;
+  --color-text-secondary: #4c5f4a;
+  --color-accent-strong: #0f8a4c;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
