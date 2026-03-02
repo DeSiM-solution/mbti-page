@@ -59,14 +59,14 @@ const iconImages = import.meta.glob("@/assets/result-page/icon/*.png", {
 const ResultImage = computed(() => {
   const rawCode = profile.value?.code?.toLowerCase?.() ?? "estj";
   const path = `/src/assets/result-page/main/${rawCode}.png`;
-  return images[path] || images["/src/assets/result-page/main/estj.png"];
+  return images[path]
 });
 
 const EsimImage = computed(() => {
   const rawCode = profile.value?.code?.toLowerCase?.() ?? "estj";
   const path = `/src/assets/result-page/esim/${rawCode}-esim.png`;
   return (
-    esimImages[path] || esimImages["/src/assets/result-page/esim/estj-esim.png"]
+    esimImages[path]
   );
 });
 
@@ -74,7 +74,7 @@ const IconImage = computed(() => {
   const rawCode = profile.value?.code?.toLowerCase?.() ?? "estj";
   const path = `/src/assets/result-page/icon/${rawCode}.psd.png`;
   return (
-    iconImages[path] || iconImages["/src/assets/result-page/icon/estj.psd.png"]
+    iconImages[path]
   );
 });
 

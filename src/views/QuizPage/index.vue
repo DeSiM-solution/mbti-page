@@ -9,7 +9,7 @@ const router = useRouter()
 
 const currentIndex = ref(0)
 const answers = ref<Record<string, string>>({})
-const selectedIndexes = ref<Record<string, number>>({})
+const selectedAnswerNums = ref<Record<string, number>>({})
 const questions = ref<QuizQuestion[]>([])
 const isLoading = ref(true)
 const loadError = ref('')
@@ -83,6 +83,51 @@ const quizList = ref([
 ])
 
 type MbtiAxis = 'E' | 'I' | 'S' | 'N' | 'T' | 'F' | 'J' | 'P'
+const questionScoreMap: Record<string, Record<number, Partial<Record<MbtiAxis, number>>>> = {
+  // 按你更正后的规则：Q1 1->E+2, 2->E+1, 4->I+1, 5->I+2
+  Q1: {
+    1: { E: 2 },
+    2: { E: 1 },
+    3: {},
+    4: { I: 1 },
+    5: { I: 2 },
+  },
+  Q2: {
+    1: { S: 2 },
+    2: { S: 1 },
+    3: {},
+    4: { N: 1 },
+    5: { N: 2 },
+  },
+  Q3: {
+    1: { T: 2 },
+    2: { T: 1 },
+    3: {},
+    4: { F: 1 },
+    5: { F: 2 },
+  },
+  Q4: {
+    1: { J: 2 },
+    2: { J: 1 },
+    3: {},
+    4: { P: 1 },
+    5: { P: 2 },
+  },
+  Q5: {
+    1: { J: 2 },
+    2: { J: 1 },
+    3: {},
+    4: { P: 1 },
+    5: { P: 2 },
+  },
+  Q6: {
+    1: { E: 2 },
+    2: { E: 1 },
+    3: {},
+    4: { I: 1 },
+    5: { I: 2 },
+  },
+}
 
 async function loadQuestions() {
   isLoading.value = true
@@ -101,10 +146,10 @@ async function loadQuestions() {
   }
 }
 
-function handleSelect(payload: { id: string; index: number; text: string }) {
+function handleSelect(payload: { id: string; index: number; text: string, answerNum: number }) {
   // 记录当前题的答案
   answers.value[payload.id] = payload.text
-  selectedIndexes.value[payload.id] = payload.index
+  selectedAnswerNums.value[payload.id] = payload.answerNum
   console.log('[quiz] select', payload)
 
   const list = quizList.value
@@ -128,35 +173,14 @@ function handleSelect(payload: { id: string; index: number; text: string }) {
     }
 
     for (const q of list) {
-      const idx = selectedIndexes.value[q.id]
-      if (idx === undefined) continue
+      const answerNum = selectedAnswerNums.value[q.id]
+      if (answerNum === undefined) continue
 
-      // 选项 index: 0,1,2,3,4  对应 1～5
-      switch (q.id) {
-        case 'Q1':
-        case 'Q6': {
-          if (idx === 0 || idx === 1) scores.E += 1
-          if (idx === 3 || idx === 4) scores.I += 1
-          break
-        }
-        case 'Q2': {
-          if (idx === 0 || idx === 1) scores.S += 1
-          if (idx === 3 || idx === 4) scores.N += 1
-          break
-        }
-        case 'Q3': {
-          if (idx === 0 || idx === 1) scores.T += 1
-          if (idx === 3 || idx === 4) scores.F += 1
-          break
-        }
-        case 'Q4':
-        case 'Q5': {
-          if (idx === 0 || idx === 1) scores.J += 1
-          if (idx === 3 || idx === 4) scores.P += 1
-          break
-        }
-        default:
-          break
+      const scoreDelta = questionScoreMap[q.id]?.[answerNum]
+      if (!scoreDelta) continue
+
+      for (const axis of Object.keys(scoreDelta) as MbtiAxis[]) {
+        scores[axis] += scoreDelta[axis] ?? 0
       }
     }
 

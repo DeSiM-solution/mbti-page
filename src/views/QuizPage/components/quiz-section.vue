@@ -63,7 +63,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "select", payload: { id: string; index: number; text: string }): void;
+  (e: "select", payload: { id: string; index: number; text: string; answerNum: number }): void;
 }>();
 
 const titleLines = computed(() => props.question.title.split("\n"));
@@ -86,6 +86,7 @@ function onSelect(index: number) {
     id: props.question.id,
     index,
     text,
+    answerNum: index + 1,
   });
 }
 </script>
