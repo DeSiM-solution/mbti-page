@@ -1,3 +1,4 @@
+<template>
 <svg width="52" height="49" viewBox="0 0 52 49" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g opacity="0.5">
 <path d="M26.3301 7.1L33.5301 4.21L31.8001 0L26.3301 7.1Z" fill="#B3D762"/>
@@ -9,3 +10,4 @@
 <path d="M51.6194 48.1702L50.1994 44.7202L44.1094 47.1602L51.6194 48.1702Z" fill="#B3D762"/>
 </g>
 </svg>
+</template>

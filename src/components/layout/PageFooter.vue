@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import simlessFooterLogo from '../../assets/simless-footer.svg'
+import SimlessFooterLogoSvg from '../assets/SimlessFooterLogoSvg.vue'
 </script>
 
 <template>
   <footer class="footer">
-    <img class="logo" :src="simlessFooterLogo" alt="SIMLESS" width="114" height="33" />
+    <SimlessFooterLogoSvg class="logo" width="114" height="33" aria-label="SIMLESS" />
     <p class="copyright">© 2026 SIMLESS</p>
   </footer>
 </template>

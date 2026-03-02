@@ -3,7 +3,8 @@ import { RouterView } from 'vue-router'
 import PageFooter from './components/layout/PageFooter.vue'
 import PageHeader from './components/layout/PageHeader.vue'
 import MobileAppShell from './components/layout/MobileAppShell.vue'
-import bannerImage from './assets/banner.svg'
+
+const bannerImage = new URL('./assets/banner.svg', import.meta.url).href
 </script>
 
 <template>

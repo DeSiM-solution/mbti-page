@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import simlessLogo from '../../assets/simless.svg'
+import SimlessLogoSvg from '../assets/SimlessLogoSvg.vue'
 </script>
 
 <template>
   <header class="header">
-    <img class="logo" :src="simlessLogo" alt="SIMLESS" width="86" height="25" />
+    <SimlessLogoSvg class="logo" width="86" height="25" aria-label="SIMLESS" />
   </header>
 </template>
 

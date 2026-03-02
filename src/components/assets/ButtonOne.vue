@@ -1,3 +1,4 @@
+<template>
 <svg width="325" height="55" viewBox="0 0 325 55" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_i_1011_6587)">
 <rect width="325" height="55" rx="27.5" fill="url(#paint0_linear_1011_6587)"/>
@@ -36,3 +37,4 @@
 </linearGradient>
 </defs>
 </svg>
+</template>

@@ -7,6 +7,8 @@
 </template>
 
 <style scoped lang="scss">
+@use "sass:string";
+
 // 定义短线数据：(起始百分比, 结束百分比)
 $dots: (
   (0, 8), (15, 15.5), (16, 22), (28, 28.5), (29, 35), (42, 43), (44, 58), (65, 72), (72.5, 73), (80, 84), (84.5, 85), (92, 93), (94, 100)
@@ -31,7 +33,7 @@ $dots: (
     $gradient: "#{$gradient}, transparent #{$last-end}%, transparent 100%";
   }
 
-  @return unquote("conic-gradient(#{$gradient})");
+  @return string.unquote("conic-gradient(#{$gradient})");
 }
 
 .accent-frame {
