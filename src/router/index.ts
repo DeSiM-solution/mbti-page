@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingPage from '../views/LandingPage.vue'
-import NotFoundPage from '../views/NotFoundPage.vue'
-import QuizPage from '../views/QuizPage.vue'
-import ResultPage from '../views/ResultPage.vue'
-import TicketPage from '../views/TicketPage.vue'
+import LandingPage from '../views/LandingPage/index.vue'
+import NotFoundPage from '../views/NotFoundPage/index.vue'
+import QuizPage from '../views/QuizPage/index.vue'
+import ResultPage from '../views/ResultPage/index.vue'
+import TicketPage from '../views/TicketPage/index.vue'
 
 const router = createRouter({
   history: createWebHistory(),

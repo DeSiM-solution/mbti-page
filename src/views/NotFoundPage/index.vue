@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import PrimaryButton from '../components/common/PrimaryButton.vue'
-import PageSection from '../components/layout/PageSection.vue'
+import PrimaryButton from '../../components/common/PrimaryButton.vue'
+import PageSection from '../../components/layout/PageSection.vue'
 
 const router = useRouter()
 </script>

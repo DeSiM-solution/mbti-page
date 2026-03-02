@@ -3,13 +3,13 @@
     <div class="step-frame-head">
       <span class="step-frame-pill">STEP{{ props.step }}</span>
       <h3>{{ props.title }}</h3>
-    </div>
+    </div> 
     <div class="step-frame-divider"></div>
     <p class="step-frame-copy" v-html="props.content"></p>
   </AccentFrame>
 </template>
 <script setup lang="ts">
-import AccentFrame from '../components/common/AccentFrame.vue'
+import AccentFrame from '../../../components/common/AccentFrame.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -53,8 +53,8 @@ const props = withDefaults(
 
 .step-frame-divider {
   margin: 9px 5.5px 12px;
-  height: 1.3px;
-  background: repeating-linear-gradient(to right, #c69c6d 0 6px, transparent 6px 12px);
+  height: 1px;
+  background: repeating-linear-gradient(to right, #c69c6d 0 5px, transparent 5px 9px);
 }
 
 .step-frame-copy {
