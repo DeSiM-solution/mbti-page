@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getQuizQuestions } from '../../services/contentService'
 import type { QuizQuestion } from '../../types/quiz'
@@ -82,6 +82,8 @@ const quizList = ref([
   }
 ])
 
+type MbtiAxis = 'E' | 'I' | 'S' | 'N' | 'T' | 'F' | 'J' | 'P'
+
 async function loadQuestions() {
   isLoading.value = true
   loadError.value = ''
@@ -109,10 +111,12 @@ function handleSelect(payload: { id: string; index: number; text: string }) {
   if (!list.length) return
 
   // 如果是最后一题，输出整份答题结果
-  const lastQuestionId = list[list.length - 1].id
+  const lastQuestion = list[list.length - 1]
+  if (!lastQuestion) return
+  const lastQuestionId = lastQuestion.id
   if (payload.id === lastQuestionId) {
     // 统计 MBTI 4 个维度分数
-    const scores: Record<string, number> = {
+    const scores: Record<MbtiAxis, number> = {
       E: 0,
       I: 0,
       S: 0,

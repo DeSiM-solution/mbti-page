@@ -506,6 +506,7 @@ const mbtiTypeCards = [
           class="share-now-btn"
           type="button"
           aria-label="今すぐシェアする"
+          @click="router.push('/ticket')"
         >
           <ButtonTwo aria-hidden="true" />
         </button>

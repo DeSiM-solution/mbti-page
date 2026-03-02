@@ -78,11 +78,14 @@ const sectionId = computed(() => `quiz-${props.question.id}`);
 const selectedIndex = ref<number | null>(null);
 
 function onSelect(index: number) {
+  const text = props.question.options[index];
+  if (text === undefined) return;
+
   selectedIndex.value = index;
   emit("select", {
     id: props.question.id,
     index,
-    text: props.question.options[index],
+    text,
   });
 }
 </script>

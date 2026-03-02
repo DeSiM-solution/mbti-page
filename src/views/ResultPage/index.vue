@@ -469,9 +469,10 @@ onMounted(() => {
     }
 
     .recommend-title-strip {
-      width: 100%;
+      width: calc(100% + 60px);
+      margin: 0 -15px;
       background: #fcee21;
-      padding: 20px 24px 26px;
+      padding: 20px 44px 26px;
       position: relative;
       transform: rotate(-7deg);
     }
