@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import AccentFrame from "@/components/common/AccentFrame.vue";
 import DoodleHeading from "@/components/common/DoodleHeading.vue";
 
@@ -60,6 +60,7 @@ type Question = {
 
 const props = defineProps<{
   question: Question;
+  selectedIndex?: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -75,13 +76,12 @@ const questionIcon = computed(() => {
 
 const sectionId = computed(() => `quiz-${props.question.id}`);
 
-const selectedIndex = ref<number | null>(null);
+const selectedIndex = computed(() => props.selectedIndex ?? null);
 
 function onSelect(index: number) {
   const text = props.question.options[index];
   if (text === undefined) return;
 
-  selectedIndex.value = index;
   emit("select", {
     id: props.question.id,
     index,

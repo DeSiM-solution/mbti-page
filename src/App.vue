@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import PageFooter from './components/layout/PageFooter.vue'
 import PageHeader from './components/layout/PageHeader.vue'
 import MobileAppShell from './components/layout/MobileAppShell.vue'
 
 const bannerImage = new URL('./assets/banner.svg', import.meta.url).href
+const route = useRoute()
+const hideTopLayout = computed(() => route.name === 'quiz')
 </script>
 
 <template>
   <MobileAppShell>
-    <PageHeader />
-    <img class="page-banner" :src="bannerImage" alt="旅タイプ診断バナー" width="375" height="350" />
+    <PageHeader v-if="!hideTopLayout" />
+    <img
+      v-if="!hideTopLayout"
+      class="page-banner"
+      :src="bannerImage"
+      alt="旅タイプ診断バナー"
+      width="375"
+      height="350"
+    />
     <main class="view-host">
       <RouterView />
     </main>

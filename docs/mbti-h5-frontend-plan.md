@@ -65,7 +65,6 @@
 ## 2.1 基础策略
 1. 以手机端优先，设计基准宽度按 `375px` 处理。
 2. 页面主体容器建议 `width: 100%`，`max-width: 375px`，桌面端居中显示，移动端铺满视口。
-3. 根容器高度使用 `min-height: 100dvh`，避免移动端地址栏导致高度跳动。
 
 ## 2.2 `index.html` 与视口
 1. 确保 viewport 配置包含：`width=device-width, initial-scale=1, viewport-fit=cover`。

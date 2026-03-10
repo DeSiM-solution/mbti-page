@@ -11,27 +11,27 @@ const faqItems: FaqItem[] = [
   {
     question: "SIMLESS旅タイプ診断は無料ですか？",
     answer:
-      "はい、SIMLESS旅タイプ診断は完全無料でご利用いただけます。診断結果もそのままご確認いただけます。",
+      "はい、SIMLESS旅タイプ診断が完全無料です。診断結果もそのままご確認いただけます。",
   },
   {
-    question: "診断を受ける際に個人情報の登録は必要ですか？",
+    question: "診断を受ける際に個人情報の登録は必須ですか？",
     answer:
-      "基本的に登録なしで診断できます。特典受け取りやプラン購入時のみ、必要な情報をご入力いただきます。",
+      "LINEともだぢ登録のみで診断していただけます。特典の受取や、プランご購入時のみ必要情報をご入力いただきます。",
   },
   {
-    question: "年齢制限はありますか？",
+    question: "診断に年齢制限はありますか？",
     answer:
-      "診断自体に年齢制限はありません。未成年の方が購入手続きを行う場合は、保護者の同意のもとでご利用ください。",
+      "診断自体に年齢制限はございません。未成年の方が商品をご購入時は、保護者の方の同意のもとご購入をお願いいたします。",
   },
   {
-    question: "診断後に必ず購入する必要はありますか？",
+    question: "診断後に必ず、商品を購入する必要はありますか？",
     answer:
-      "購入は必須ではありません。診断結果の確認のみでも問題なくご利用いただけます。",
+      "購入は必須ではございません。旅タイプ診断をお楽しみくださいませ。",
   },
   {
-    question: "対応している国やデータ容量プランはどこで確認できますか？",
+    question: "対応している国やデータ容量プランはどこから確認できますか？",
     answer:
-      "診断結果ページからおすすめプランの詳細をご確認いただけます。対象国・容量・有効期間を一覧で確認可能です。",
+      "診断結果ページからおすすめプランをご確認いただけます。またSIMLESS<a href=\"https://lin.ee/5DvD6MI\" target=\"_blank\" rel=\"noopener noreferrer\">公式LINE</a>・<a href=\"https://simless.tech/ja-jp/collections/all_products\" target=\"_blank\" rel=\"noopener noreferrer\">公式HP</a>からもご確認いただけます。",
   },
 ];
 
@@ -99,7 +99,7 @@ function toggle(index: number) {
 
         <div v-if="openedIndex === index" class="faq-answer-row">
           <span class="faq-badge a">A</span>
-          <p class="faq-answer">{{ item.answer }}</p>
+          <p class="faq-answer" v-html="item.answer"></p>
         </div>
       </article>
     </div>
@@ -196,4 +196,11 @@ function toggle(index: number) {
   font-weight: 400;
   line-height: 1.6;
 }
+
+.faq-answer a {
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
 </style>

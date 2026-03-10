@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getQuizQuestions } from '../../services/contentService'
 import type { QuizQuestion } from '../../types/quiz'
 import QuizItem from './components/quiz-section.vue'
+import PrimaryButton from '@/components/common/PrimaryButton.vue'
+import { calculateMbtiResult } from '@/utils/quizResult'
 
 const router = useRouter()
 
@@ -82,52 +84,28 @@ const quizList = ref([
   }
 ])
 
-type MbtiAxis = 'E' | 'I' | 'S' | 'N' | 'T' | 'F' | 'J' | 'P'
-const questionScoreMap: Record<string, Record<number, Partial<Record<MbtiAxis, number>>>> = {
-  // 按你更正后的规则：Q1 1->E+2, 2->E+1, 4->I+1, 5->I+2
-  Q1: {
-    1: { E: 2 },
-    2: { E: 1 },
-    3: {},
-    4: { I: 1 },
-    5: { I: 2 },
-  },
-  Q2: {
-    1: { S: 2 },
-    2: { S: 1 },
-    3: {},
-    4: { N: 1 },
-    5: { N: 2 },
-  },
-  Q3: {
-    1: { T: 2 },
-    2: { T: 1 },
-    3: {},
-    4: { F: 1 },
-    5: { F: 2 },
-  },
-  Q4: {
-    1: { J: 2 },
-    2: { J: 1 },
-    3: {},
-    4: { P: 1 },
-    5: { P: 2 },
-  },
-  Q5: {
-    1: { J: 2 },
-    2: { J: 1 },
-    3: {},
-    4: { P: 1 },
-    5: { P: 2 },
-  },
-  Q6: {
-    1: { E: 2 },
-    2: { E: 1 },
-    3: {},
-    4: { I: 1 },
-    5: { I: 2 },
-  },
-}
+
+const totalQuestions = computed(() => quizList.value.length)
+const currentQuestion = computed(() => quizList.value[currentIndex.value])
+const isLastQuestion = computed(() => currentIndex.value === totalQuestions.value - 1)
+const progressPercent = computed(() => {
+  if (!totalQuestions.value) return 0
+  return Math.round(((currentIndex.value + 1) / totalQuestions.value) * 100)
+})
+const currentSelectedIndex = computed(() => {
+  const q = currentQuestion.value
+  if (!q) return null
+  const answerNum = selectedAnswerNums.value[q.id]
+  if (answerNum === undefined) return null
+  return answerNum - 1
+})
+const canGoPrev = computed(() => currentIndex.value > 0)
+const canGoNext = computed(() => {
+  const q = currentQuestion.value
+  if (!q) return false
+  return selectedAnswerNums.value[q.id] !== undefined
+})
+const nextLabel = computed(() => (isLastQuestion.value ? '送信' : '次へ'))
 
 async function loadQuestions() {
   isLoading.value = true
@@ -139,6 +117,7 @@ async function loadQuestions() {
     }
     currentIndex.value = 0
     answers.value = {}
+    selectedAnswerNums.value = {}
   } catch {
     loadError.value = '質問データの読み込みに失敗しました。'
   } finally {
@@ -151,62 +130,44 @@ function handleSelect(payload: { id: string; index: number; text: string, answer
   answers.value[payload.id] = payload.text
   selectedAnswerNums.value[payload.id] = payload.answerNum
   console.log('[quiz] select', payload)
+}
 
+function submitQuiz() {
   const list = quizList.value
   if (!list.length) return
 
-  // 如果是最后一题，输出整份答题结果
-  const lastQuestion = list[list.length - 1]
-  if (!lastQuestion) return
-  const lastQuestionId = lastQuestion.id
-  if (payload.id === lastQuestionId) {
-    // 统计 MBTI 4 个维度分数
-    const scores: Record<MbtiAxis, number> = {
-      E: 0,
-      I: 0,
-      S: 0,
-      N: 0,
-      T: 0,
-      F: 0,
-      J: 0,
-      P: 0,
-    }
-
-    for (const q of list) {
-      const answerNum = selectedAnswerNums.value[q.id]
-      if (answerNum === undefined) continue
-
-      const scoreDelta = questionScoreMap[q.id]?.[answerNum]
-      if (!scoreDelta) continue
-
-      for (const axis of Object.keys(scoreDelta) as MbtiAxis[]) {
-        scores[axis] += scoreDelta[axis] ?? 0
-      }
-    }
-
-    const ei = scores.E >= scores.I ? 'E' : 'I'
-    const sn = scores.S >= scores.N ? 'S' : 'N'
-    const tf = scores.T >= scores.F ? 'T' : 'F'
-    const jp = scores.J >= scores.P ? 'J' : 'P'
-
-    const mbtiType = `${ei}${sn}${tf}${jp}`
-
-    console.log('[quiz] final scores', scores, 'type:', mbtiType)
-
-    // 跳转到 /result/:type，例如 /result/ISFJ
-    router.push({ name: 'result', params: { type: mbtiType } })
+  // 如果有未答题，跳回第一道未答题
+  const firstUnanswered = list.findIndex((q) => selectedAnswerNums.value[q.id] === undefined)
+  if (firstUnanswered !== -1) {
+    currentIndex.value = firstUnanswered
     return
   }
 
-  // 选中当前题后，自动滚动到下一题（Q1 -> Q2 -> ...）
-  const currentIdx = list.findIndex((q) => q.id === payload.id)
-  const next = currentIdx >= 0 ? list[currentIdx + 1] : null
-  if (next) {
-    const el = document.getElementById(`quiz-${next.id}`)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+  const { scores, baseType, mappedType } = calculateMbtiResult(
+    list.map((q) => q.id),
+    selectedAnswerNums.value,
+  )
+
+  console.log('[quiz] final scores', scores, 'type:', baseType, 'mapped:', mappedType)
+
+  // 跳转到 /result/:type，例如 /result/ISFJ
+  router.push({ name: 'result', params: { type: mappedType } })
+}
+
+function goPrev() {
+  if (!canGoPrev.value) return
+  currentIndex.value -= 1
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function goNext() {
+  if (!canGoNext.value) return
+  if (isLastQuestion.value) {
+    submitQuiz()
+    return
   }
+  currentIndex.value += 1
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(() => {
@@ -216,21 +177,75 @@ onMounted(() => {
 
 <template>
   <div class="quiz-page">
+    <div class="quiz-progress">
+    <div class="progress-meta">
+      <span class="progress-text">{{ currentIndex + 1 }} / {{ totalQuestions }}</span>
+    </div>
+      <div class="progress-track" role="progressbar" :aria-valuenow="progressPercent" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-fill" :style="{ width: `${progressPercent}%` }"></div>
+      </div>
+    </div>
+
     <QuizItem
-      v-for="q in quizList"
-      :key="q.id"
-      :question="q"
+      v-if="currentQuestion"
+      :question="currentQuestion"
+      :selected-index="currentSelectedIndex"
       @select="handleSelect"
     />
+
+    <div class="quiz-actions">
+      <PrimaryButton variant="ghost" :block="false" :disabled="!canGoPrev" @click="goPrev">前へ</PrimaryButton>
+      <PrimaryButton :block="false" :disabled="!canGoNext" @click="goNext">{{ nextLabel }}</PrimaryButton>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .quiz-page {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   padding-bottom: 24px;
   background: linear-gradient(to bottom, #FFFFB3 50%, #E2FFB3 100%)
+}
+
+.quiz-progress {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 12px 16px 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 179, 0.98), rgba(255, 255, 179, 0.7));
+  backdrop-filter: blur(4px);
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d7a37;
+  margin-bottom: 6px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px rgba(15, 138, 76, 0.2);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(120deg, #0b9f55, #39b84f);
+  transition: width 0.2s ease;
+}
+
+.quiz-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px 24px;
 }
 
 .head {
