@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import ButtonOne from "../../components/assets/ButtonOne.vue";
 import CircleSvg from "../../components/assets/CircleSvg.vue";
@@ -26,6 +27,7 @@ import ButtonTwo from "../../components/assets/ButtonTwo.vue";
 import Passport from "../../components/assets/Passport.vue";
 import Camera from "../../components/assets/Camera.vue";
 import LandingFaqSection from "./components/LandingFaqSection.vue";
+import { prefetchLiffUserId, shareCurrentPage } from "../../services/liffShare";
 
 const router = useRouter();
 const slashMarks = Array.from({ length: 26 }, (_, index) => index);
@@ -37,6 +39,14 @@ const mbtiTypeCards = [
   { code: "ESFP", label: "SNS爆発型", image: ESFPImage },
   { code: "INTJ", label: "戦略型タイプ", image: INTJImage },
 ];
+
+function handleShareClick() {
+  void shareCurrentPage();
+}
+
+onMounted(() => {
+  void prefetchLiffUserId();
+});
 </script>
 
 <template>
@@ -320,7 +330,7 @@ const mbtiTypeCards = [
           </div>
         </article>
 
-        <button class="share-now-btn" type="button" aria-label="今すぐシェアする" @click="router.push('/ticket')">
+        <button class="share-now-btn" type="button" aria-label="今すぐシェアする" @click="handleShareClick">
           <ButtonTwo aria-hidden="true" />
         </button>
 

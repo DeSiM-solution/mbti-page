@@ -31,7 +31,7 @@ const faqItems: FaqItem[] = [
   {
     question: "対応している国やデータ容量プランはどこから確認できますか？",
     answer:
-      "診断結果ページからおすすめプランをご確認いただけます。またSIMLESS<a href=\"https://lin.ee/5DvD6MI\" target=\"_blank\" rel=\"noopener noreferrer\">公式LINE</a>・<a href=\"https://simless.tech/ja-jp/collections/all_products\" target=\"_blank\" rel=\"noopener noreferrer\">公式HP</a>からもご確認いただけます。",
+      "診断結果ページからおすすめプランをご確認いただけます。またSIMLESS<a href=\"https://lin.ee/5DvD6MI\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #4d4d4d;\">公式LINE</a>・<a href=\"https://simless.tech/ja-jp/collections/all_products\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #4d4d4d;\">公式HP</a>からもご確認いただけます。",
   },
 ];
 

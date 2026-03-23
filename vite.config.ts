@@ -5,13 +5,16 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  server: {
+    allowedHosts: ['nonsanative-indeciduate-ivan.ngrok-free.dev'],
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     globals: true,
   },
 })

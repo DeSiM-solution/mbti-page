@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import resultData from "../ResultPage/result-data.json";
 import AccentFrame from "@/components/common/AccentFrame.vue";
 import DoodleHeading from "@/components/common/DoodleHeading.vue";
@@ -12,6 +12,7 @@ import Laurel from "@/components/assets/Laurel.vue";
 import PlanFrame from "@/assets/result-page/plan-frame.png";
 import ShareLoop from "@/assets/result-page/loop.svg";
 import ButtonTwo from "@/components/assets/ButtonTwo.vue";
+import { shareCurrentPage } from "@/services/liffShare";
 
 type ResultProfile = {
   code: string;
@@ -23,7 +24,6 @@ type ResultProfile = {
 };
 
 const route = useRoute();
-const router = useRouter();
 const isLoading = ref(true);
 const loadError = ref("");
 const fallbackProfile: ResultProfile = {
@@ -41,19 +41,22 @@ const resultType = computed(() => {
   return rawType;
 });
 
-const images = import.meta.glob("@/assets/result-page/main/*.png", {
+const images = import.meta.glob<string>("@/assets/result-page/main/*.png", {
   eager: true,
-  as: "url",
+  query: "?url",
+  import: "default",
 });
 
-const esimImages = import.meta.glob("@/assets/result-page/esim/*.png", {
+const esimImages = import.meta.glob<string>("@/assets/result-page/esim/*.png", {
   eager: true,
-  as: "url",
+  query: "?url",
+  import: "default",
 });
 
-const iconImages = import.meta.glob("@/assets/result-page/icon/*.png", {
+const iconImages = import.meta.glob<string>("@/assets/result-page/icon/*.png", {
   eager: true,
-  as: "url",
+  query: "?url",
+  import: "default",
 });
 
 const ResultImage = computed(() => {
@@ -86,6 +89,10 @@ const displayPlanName = computed(() => {
   }
   return rawPlanName;
 });
+
+function handleShareClick() {
+  void shareCurrentPage();
+}
 
 function loadProfile() {
   isLoading.value = true;
@@ -264,7 +271,7 @@ onMounted(() => {
           3人にLINEでシェアして<br />
           <span>無料eSIMをゲット</span>
         </p> -->
-        <button class="share-button" type="button" @click="router.push('/ticket')">
+        <button class="share-button" type="button" @click="handleShareClick">
           <ButtonTwo />
         </button>
       </div>
