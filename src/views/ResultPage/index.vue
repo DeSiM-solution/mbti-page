@@ -95,7 +95,8 @@ const displayPlanName = computed(() => {
 });
 
 function handleShareClick() {
-  void shareCurrentPage();
+  const shareLabel = `${profile.value.title}（${profile.value.code}）`;
+  void shareCurrentPage(shareLabel);
 }
 
 function toShopify() {

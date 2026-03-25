@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
+import { createPinia, setActivePinia } from "pinia";
 import ResultPage from "../src/views/ResultPage/index.vue";
 
-const { mockLiffUserId, mockShareCurrentPage } = vi.hoisted(() => ({
-  mockLiffUserId: { value: null as string | null },
+const { mockShareCurrentPage } = vi.hoisted(() => ({
   mockShareCurrentPage: vi.fn(),
 }));
 
@@ -17,18 +17,18 @@ vi.mock("vue-router", () => ({
 
 vi.mock("@/services/liffShare", () => ({
   shareCurrentPage: mockShareCurrentPage,
-  liffUserId: mockLiffUserId,
 }));
 
 describe("ResultPage Shopify link", () => {
   beforeEach(() => {
-    mockLiffUserId.value = null;
+    setActivePinia(createPinia());
+    sessionStorage.clear();
     mockShareCurrentPage.mockReset();
     vi.restoreAllMocks();
   });
 
   it("adds agreed UTM params and lineId for plan click", async () => {
-    mockLiffUserId.value = "U0123456789abcdef0123456789abcdef";
+    sessionStorage.setItem("userId", "U0123456789abcdef0123456789abcdef");
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
     const wrapper = shallowMount(ResultPage);
@@ -49,7 +49,7 @@ describe("ResultPage Shopify link", () => {
   });
 
   it("sets content tag for esim showcase click", async () => {
-    mockLiffUserId.value = "U0123456789abcdef0123456789abcdef";
+    sessionStorage.setItem("userId", "U0123456789abcdef0123456789abcdef");
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
     const wrapper = shallowMount(ResultPage);
@@ -63,5 +63,14 @@ describe("ResultPage Shopify link", () => {
     expect(url.searchParams.get("utm_source")).toBe("line");
     expect(url.searchParams.get("utm_medium")).toBe("referral");
     expect(url.searchParams.get("utm_campaign")).toBe("mbti_result");
+  });
+
+  it("passes the current result to shareCurrentPage when share button is clicked", async () => {
+    const wrapper = shallowMount(ResultPage);
+
+    await wrapper.find(".share-button").trigger("click");
+
+    expect(mockShareCurrentPage).toHaveBeenCalledTimes(1);
+    expect(mockShareCurrentPage).toHaveBeenCalledWith("計画型トラベラー（ESTJ）");
   });
 });

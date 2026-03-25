@@ -1,10 +1,16 @@
 <template>
   <div class="shell">
-    <div class="device">
+    <div :class="['device', { 'device--flat': flat }]">
       <slot />
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  flat?: boolean;
+}>();
+</script>
 
 <style scoped>
 .shell {
@@ -23,5 +29,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.device--flat {
+  box-shadow: none;
 }
 </style>

@@ -113,7 +113,7 @@ export function buildShareUrl(userId: string) {
   return url.toString();
 }
 
-export async function shareCurrentPage() {
+export async function shareCurrentPage(customShareLabel?: string) {
   const store = getLiffSessionStore();
 
   try {
@@ -123,7 +123,9 @@ export async function shareCurrentPage() {
     }
 
     const shareUrl = buildShareUrl(store.userId);
-    const shareText = `${SHARE_TEXT_PREFIX} ${shareUrl}`;
+    const shareText = customShareLabel
+      ? `${customShareLabel}\n${SHARE_TEXT_PREFIX} ${shareUrl}`
+      : `${SHARE_TEXT_PREFIX} ${shareUrl}`;
 
     if (!liff.isApiAvailable("shareTargetPicker")) {
       toast.error(SHARE_UNAVAILABLE_ERROR_MESSAGE);
