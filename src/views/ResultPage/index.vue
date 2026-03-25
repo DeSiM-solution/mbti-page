@@ -12,7 +12,8 @@ import Laurel from "@/components/assets/Laurel.vue";
 import PlanFrame from "@/assets/result-page/plan-frame.png";
 import ShareLoop from "@/assets/result-page/loop.svg";
 import ButtonTwo from "@/components/assets/ButtonTwo.vue";
-import { liffUserId, shareCurrentPage } from "@/services/liffShare";
+import { shareCurrentPage } from "@/services/liffShare";
+import { useLiffSessionStore } from "@/stores/liffSession";
 
 type ResultProfile = {
   code: string;
@@ -25,6 +26,7 @@ type ResultProfile = {
 };
 
 const route = useRoute();
+const liffSessionStore = useLiffSessionStore();
 const isLoading = ref(true);
 const loadError = ref("");
 const fallbackProfile: ResultProfile = {
@@ -104,7 +106,7 @@ function toShopify() {
   const mbtiType = profile.value.code?.toUpperCase?.() ?? resultType.value;
   url.searchParams.set("utm_content", mbtiType);
 
-  const lineId = liffUserId.value;
+  const lineId = liffSessionStore.userId;
   if (lineId) {
     url.searchParams.set("lineId", lineId);
   }

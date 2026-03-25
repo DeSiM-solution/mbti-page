@@ -6,14 +6,18 @@ import type { QuizQuestion } from '../../types/quiz'
 import QuizItem from './components/quiz-section.vue'
 import PrimaryButton from '@/components/common/PrimaryButton.vue'
 import { calculateMbtiResult } from '@/utils/quizResult'
+import { saveLineShareTestResult } from '@/services/lineShareRewardApi'
+import { useLiffSessionStore } from '@/stores/liffSession'
 
 const router = useRouter()
+const liffSessionStore = useLiffSessionStore()
 
 const currentIndex = ref(0)
 const answers = ref<Record<string, string>>({})
 const selectedAnswerNums = ref<Record<string, number>>({})
 const questions = ref<QuizQuestion[]>([])
 const isLoading = ref(true)
+const isSubmitting = ref(false)
 const loadError = ref('')
 const quizList = ref([
   {
@@ -103,7 +107,7 @@ const canGoPrev = computed(() => currentIndex.value > 0)
 const canGoNext = computed(() => {
   const q = currentQuestion.value
   if (!q) return false
-  return selectedAnswerNums.value[q.id] !== undefined
+  return selectedAnswerNums.value[q.id] !== undefined && !isSubmitting.value
 })
 const nextLabel = computed(() => (isLastQuestion.value ? '送信' : '次へ'))
 
@@ -132,7 +136,15 @@ function handleSelect(payload: { id: string; index: number; text: string, answer
   console.log('[quiz] select', payload)
 }
 
-function submitQuiz() {
+function buildAnswerContent(questionIds: string[]) {
+  return JSON.stringify(
+    Object.fromEntries(
+      questionIds.map((questionId) => [questionId.toLowerCase(), String(selectedAnswerNums.value[questionId])]),
+    ),
+  )
+}
+
+async function submitQuiz() {
   const list = quizList.value
   if (!list.length) return
 
@@ -150,20 +162,36 @@ function submitQuiz() {
 
   console.log('[quiz] final scores', scores, 'type:', baseType, 'mapped:', mappedType)
 
-  // 跳转到 /result/:type，例如 /result/ISFJ
+  isSubmitting.value = true
+  try {
+    if (liffSessionStore.userId) {
+      try {
+        await saveLineShareTestResult({
+          sharerUserId: liffSessionStore.userId,
+          testResult: mappedType,
+          answerContent: buildAnswerContent(list.map((q) => q.id)),
+        })
+      } catch (error) {
+        console.error('[quiz] saveLineShareTestResult failed', error)
+      }
+    }
+
   router.push({ name: 'result', params: { type: mappedType } })
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function goPrev() {
-  if (!canGoPrev.value) return
+  if (!canGoPrev.value || isSubmitting.value) return
   currentIndex.value -= 1
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function goNext() {
+async function goNext() {
   if (!canGoNext.value) return
   if (isLastQuestion.value) {
-    submitQuiz()
+    await submitQuiz()
     return
   }
   currentIndex.value += 1
@@ -195,7 +223,7 @@ onMounted(() => {
 
     <div class="quiz-actions">
       <PrimaryButton variant="ghost" :block="false" :disabled="!canGoPrev" @click="goPrev">前へ</PrimaryButton>
-      <PrimaryButton :block="false" :disabled="!canGoNext" @click="goNext">{{ nextLabel }}</PrimaryButton>
+      <PrimaryButton :block="false" :disabled="!canGoNext" :loading="isLastQuestion && isSubmitting" @click="goNext">{{ nextLabel }}</PrimaryButton>
     </div>
   </div>
 </template>

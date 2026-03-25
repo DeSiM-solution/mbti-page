@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 import ButtonOne from "../../components/assets/ButtonOne.vue";
 import CircleSvg from "../../components/assets/CircleSvg.vue";
 import GlassesSvg from "../../components/assets/GlassesSvg.vue";
@@ -27,10 +28,15 @@ import ButtonTwo from "../../components/assets/ButtonTwo.vue";
 import Passport from "../../components/assets/Passport.vue";
 import Camera from "../../components/assets/Camera.vue";
 import LandingFaqSection from "./components/LandingFaqSection.vue";
-import { prefetchLiffUserId, shareCurrentPage } from "../../services/liffShare";
+import { shareCurrentPage } from "../../services/liffShare";
+import { confirmLineShareReward } from "../../services/lineShareRewardApi";
+import { useLiffSessionStore } from "@/stores/liffSession";
 
 const router = useRouter();
+const liffSessionStore = useLiffSessionStore();
 const slashMarks = Array.from({ length: 26 }, (_, index) => index);
+const SHARE_RECEIVED_MESSAGE = "シェア特典の受け取りが完了しました。";
+const SELF_SHARE_REWARD_MESSAGE = "ご自身のシェアリンクからは特典を受け取れません。";
 const mbtiTypeCards = [
   { code: "ESTJ", label: "計画型", image: ESTJImage },
   { code: "INFP", label: "自由型", image: INFPImage },
@@ -44,8 +50,34 @@ function handleShareClick() {
   void shareCurrentPage();
 }
 
+async function confirmShareRewardIfNeeded() {
+  const sharerUserId = liffSessionStore.refereeUserId;
+  const inviteeUserId = liffSessionStore.userId;
+
+  if (!sharerUserId || !inviteeUserId) {
+    return;
+  }
+
+  if (sharerUserId === inviteeUserId) {
+    toast.error(SELF_SHARE_REWARD_MESSAGE);
+    return;
+  }
+
+  try {
+    await confirmLineShareReward({
+      sharerUserId,
+      inviteeUserId,
+    });
+
+    const displayName = liffSessionStore.userName.trim();
+    toast.success(displayName ? `${displayName}、${SHARE_RECEIVED_MESSAGE}` : SHARE_RECEIVED_MESSAGE);
+  } catch (error) {
+    console.error("[landing] confirmLineShareReward failed", error);
+  }
+}
+
 onMounted(() => {
-  void prefetchLiffUserId();
+  void confirmShareRewardIfNeeded();
 });
 </script>
 

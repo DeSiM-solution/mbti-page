@@ -1,6 +1,7 @@
-import { ref } from "vue";
 import liff from "@line/liff";
 import { toast } from "vue-sonner";
+import { pinia } from "@/stores";
+import { useLiffSessionStore } from "@/stores/liffSession";
 
 const SHARE_TEXT_PREFIX = "あなたのMBTIを診断してみよう！👉";
 const PROFILE_FETCH_ERROR_MESSAGE = "LINEプロフィールの取得に失敗しました。もう一度お試しください。";
@@ -8,11 +9,8 @@ const SHARE_ERROR_MESSAGE = "シェアに失敗しました。もう一度お試
 const SHARE_UNAVAILABLE_ERROR_MESSAGE =
   "シェア機能を利用できません。LINE内で開いているか、LINE DevelopersのshareTargetPicker設定をご確認ください。";
 
-let cachedUserId: string | null = null;
 let liffInitPromise: Promise<void> | null = null;
 let isLiffInitialized = false;
-
-export const liffUserId = ref<string | null>(null);
 
 function resolveLiffId() {
   const liffId = import.meta.env.VITE_LIFF_ID?.trim() ?? "";
@@ -22,6 +20,15 @@ function resolveLiffId() {
   }
 
   return liffId;
+}
+
+function getLiffSessionStore() {
+  return useLiffSessionStore(pinia);
+}
+
+export function extractRefereeUserId(source: string) {
+  const match = source.match(/(?:^|[?&])ref=(U[0-9a-f]{32})(?=&|#|$)/);
+  return match?.[1] ?? "";
 }
 
 async function ensureLiffInitialized() {
@@ -47,48 +54,75 @@ async function ensureLiffInitialized() {
   await liffInitPromise;
 }
 
-async function fetchCurrentUserId() {
-  if (cachedUserId) {
-    return cachedUserId;
+function ensureLiffLoggedIn() {
+  if (liff.isLoggedIn()) {
+    return true;
   }
 
-  await ensureLiffInitialized();
+  liff.login();
 
-  const profile = await liff.getProfile();
-  const userId = profile?.userId?.trim();
-
-  if (!userId) {
-    throw new Error("LINE userId is missing from LIFF profile.");
-  }
-
-  cachedUserId = userId;
-  liffUserId.value = userId;
-  return userId;
+  return false;
 }
 
-export function buildShareUrl(currentUrl: string, userId: string) {
-  const url = new URL(currentUrl);
+async function fetchCurrentUserIdentity() {
+  await ensureLiffInitialized();
+
+  if (!ensureLiffLoggedIn()) {
+    return null;
+  }
+
+  const context = liff.getContext();
+  const profile = await liff.getProfile();
+  const userId = context?.userId?.trim() || profile?.userId?.trim() || "";
+  const userName = profile?.displayName?.trim() || "";
+
+  if (!userId || !userName) {
+    throw new Error("LINE user info is missing.");
+  }
+
+  return {
+    userId,
+    userName,
+  };
+}
+
+export async function initializeLiffSession(source: string, refSource: string = source) {
+  const store = getLiffSessionStore();
+  store.clear();
+
+  const refereeUserId = extractRefereeUserId(refSource);
+  if (refereeUserId) {
+    store.setRefereeUserId(refereeUserId);
+  }
+
+  const identity = await fetchCurrentUserIdentity();
+  if (!identity) {
+    return null;
+  }
+  store.setIdentity(identity.userId, identity.userName);
+
+  return {
+    ...identity,
+    refereeUserId,
+  };
+}
+
+export function buildShareUrl(userId: string) {
+  const url = new URL(`https://liff.line.me/${resolveLiffId()}`);
   url.searchParams.set("ref", userId);
   return url.toString();
 }
 
-export function extractReferrerLineId(source: string) {
-  const match = source.match(/(?:^|[?&])ref=(U[0-9a-f]{32})(?=&|#|$)/);
-  return match?.[1] ?? null;
-}
-
-export async function prefetchLiffUserId() {
-  try {
-    return await fetchCurrentUserId();
-  } catch {
-    return null;
-  }
-}
-
 export async function shareCurrentPage() {
+  const store = getLiffSessionStore();
+
   try {
-    const userId = cachedUserId ?? (await fetchCurrentUserId());
-    const shareUrl = buildShareUrl(window.location.href, userId);
+    if (!store.userId) {
+      toast.error(PROFILE_FETCH_ERROR_MESSAGE);
+      return false;
+    }
+
+    const shareUrl = buildShareUrl(store.userId);
     const shareText = `${SHARE_TEXT_PREFIX} ${shareUrl}`;
 
     if (!liff.isApiAvailable("shareTargetPicker")) {
@@ -106,20 +140,14 @@ export async function shareCurrentPage() {
     return true;
   } catch (error) {
     console.error("[LIFF share] shareCurrentPage failed", error);
-
-    if (cachedUserId) {
-      toast.error(SHARE_ERROR_MESSAGE);
-    } else {
-      toast.error(PROFILE_FETCH_ERROR_MESSAGE);
-    }
-
+    toast.error(store.userId ? SHARE_ERROR_MESSAGE : PROFILE_FETCH_ERROR_MESSAGE);
     return false;
   }
 }
 
-export function __resetLiffShareStateForTests() {
-  cachedUserId = null;
+export function resetLiffStateForDebug() {
+  const store = getLiffSessionStore();
+  store.clear();
   liffInitPromise = null;
   isLiffInitialized = false;
-  liffUserId.value = null;
 }

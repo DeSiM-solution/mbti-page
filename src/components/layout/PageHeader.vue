@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import SimlessLogoSvg from '../assets/SimlessLogoSvg.vue'
-import { extractReferrerLineId, liffUserId, prefetchLiffUserId } from '@/services/liffShare'
+import { useLiffSessionStore } from '@/stores/liffSession'
 
-const route = useRoute()
-const displayLineId = computed(() => liffUserId.value)
-const displayRefLineId = computed(() => extractReferrerLineId(route.fullPath))
-
-onMounted(() => {
-  void prefetchLiffUserId()
-})
+const liffSessionStore = useLiffSessionStore()
+const displayLineId = computed(() => liffSessionStore.userId)
+const displayRefLineId = computed(() => liffSessionStore.refereeUserId)
 </script>
 
 <template>
