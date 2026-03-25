@@ -12,7 +12,7 @@ import Laurel from "@/components/assets/Laurel.vue";
 import PlanFrame from "@/assets/result-page/plan-frame.png";
 import ShareLoop from "@/assets/result-page/loop.svg";
 import ButtonTwo from "@/components/assets/ButtonTwo.vue";
-import { shareCurrentPage } from "@/services/liffShare";
+import { liffUserId, shareCurrentPage } from "@/services/liffShare";
 
 type ResultProfile = {
   code: string;
@@ -21,6 +21,7 @@ type ResultProfile = {
   features: string;
   communicationStyle: string[];
   planName: string;
+  url: string;
 };
 
 const route = useRoute();
@@ -33,6 +34,7 @@ const fallbackProfile: ResultProfile = {
   features: "",
   communicationStyle: [],
   planName: "",
+  url: "",
 };
 const profile = ref<ResultProfile>(resultData[0] ?? fallbackProfile);
 
@@ -92,6 +94,21 @@ const displayPlanName = computed(() => {
 
 function handleShareClick() {
   void shareCurrentPage();
+}
+
+function toShopify() {
+  const url = new URL(profile.value.url);
+  url.searchParams.set("utm_source", "line");
+  url.searchParams.set("utm_medium", "referral");
+  url.searchParams.set("utm_campaign", "mbti_result");
+  const mbtiType = profile.value.code?.toUpperCase?.() ?? resultType.value;
+  url.searchParams.set("utm_content", mbtiType);
+
+  const lineId = liffUserId.value;
+  if (lineId) {
+    url.searchParams.set("lineId", lineId);
+  }
+  window.open(url.toString(), "_blank");
 }
 
 function loadProfile() {
@@ -208,7 +225,7 @@ onMounted(() => {
         <span class="mbti-code">{{ profile.code }}</span>
         <span class="recommend-title">おすすめeSIM</span>
       </div>
-      <div class="esim-showcase">
+      <div class="esim-showcase" @click="toShopify">
         <span class="laurel laurel-left" aria-hidden="true">
           <Laurel />
         </span>
@@ -219,7 +236,7 @@ onMounted(() => {
           <img :src="EsimImage" alt="おすすめeSIM" class="esim-image" />
         </div>
       </div>
-      <div class="plan-name">
+      <div class="plan-name" @click="toShopify">
         <img :src="PlanFrame" alt="plan-frame" class="plan-frame" />
         <div class="plan-arrow" aria-hidden="true">
           <svg
@@ -529,6 +546,7 @@ onMounted(() => {
       display: flex;
       justify-content: center;
       align-items: center;
+      cursor: pointer;
     }
 
     .laurel {
@@ -559,6 +577,7 @@ onMounted(() => {
     }
 
     .plan-name {
+      cursor: pointer;
       margin-top: 32px;
       padding-left: 12px;
       padding-right: 12px;
