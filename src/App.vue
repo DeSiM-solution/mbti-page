@@ -31,7 +31,7 @@ const hideTopLayout = computed(() => route.name === 'quiz' || showBootPage.value
       <RouterView v-else />
     </main>
     <PageFooter v-if="!showBootPage" />
-    <Toaster position="top-center" />
+    <Toaster position="top-center" rich-colors/>
   </MobileAppShell>
 </template>
 

@@ -36,7 +36,7 @@ const router = useRouter();
 const liffSessionStore = useLiffSessionStore();
 const slashMarks = Array.from({ length: 26 }, (_, index) => index);
 const SHARE_RECEIVED_MESSAGE = "シェア特典の受け取りが完了しました。";
-const SELF_SHARE_REWARD_MESSAGE = "ご自身のシェアリンクからは特典を受け取れません。";
+const SHARE_REWARD_ERROR_MESSAGE = "シェア特典の受け取りに失敗しました。";
 const mbtiTypeCards = [
   { code: "ESTJ", label: "計画型", image: ESTJImage },
   { code: "INFP", label: "自由型", image: INFPImage },
@@ -58,20 +58,22 @@ async function confirmShareRewardIfNeeded() {
     return;
   }
 
-  if (sharerUserId === inviteeUserId) {
-    toast.error(SELF_SHARE_REWARD_MESSAGE);
-    return;
-  }
+  // if (sharerUserId === inviteeUserId) {
+  //   toast.error(SELF_SHARE_REWARD_MESSAGE);
+  //   return;
+  // }
 
   try {
     await confirmLineShareReward({
       sharerUserId,
       inviteeUserId,
     });
-
     const displayName = liffSessionStore.userName.trim();
     toast.success(displayName ? `${displayName}、${SHARE_RECEIVED_MESSAGE}` : SHARE_RECEIVED_MESSAGE);
   } catch (error) {
+    const errorMessage =
+      error instanceof Error && error.message.trim() ? error.message : SHARE_REWARD_ERROR_MESSAGE;
+    toast.error(errorMessage);
     console.error("[landing] confirmLineShareReward failed", error);
   }
 }
