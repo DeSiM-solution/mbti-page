@@ -3,11 +3,12 @@ import { toast } from "vue-sonner";
 import { pinia } from "@/stores";
 import { useLiffSessionStore } from "@/stores/liffSession";
 
-const SHARE_TEXT_PREFIX = "あなたのMBTIを診断してみよう！👉";
-const PROFILE_FETCH_ERROR_MESSAGE = "LINEプロフィールの取得に失敗しました。もう一度お試しください。";
+const PROFILE_FETCH_ERROR_MESSAGE =
+  "LINEプロフィールの取得に失敗しました。もう一度お試しください。";
 const SHARE_ERROR_MESSAGE = "シェアに失敗しました。もう一度お試しください。";
 const SHARE_UNAVAILABLE_ERROR_MESSAGE =
   "シェア機能を利用できません。LINE内で開いているか、LINE DevelopersのshareTargetPicker設定をご確認ください。";
+const DEFAULT_SHARE_TYPE_LABEL = "旅タイプ（MBTI）";
 
 let liffInitPromise: Promise<void> | null = null;
 let isLiffInitialized = false;
@@ -86,7 +87,10 @@ async function fetchCurrentUserIdentity() {
   };
 }
 
-export async function initializeLiffSession(source: string, refSource: string = source) {
+export async function initializeLiffSession(
+  source: string,
+  refSource: string = source,
+) {
   const store = getLiffSessionStore();
   store.clear();
 
@@ -113,6 +117,13 @@ export function buildShareUrl(userId: string) {
   return url.toString();
 }
 
+function buildShareMessage(typeLabel: string, shareUrl: string) {
+  return `私のMBTIは「${typeLabel}」✈️
+あなたのタイプも診断してみて👇
+${shareUrl}
+このリンクから診断した方限定で、10％OFFクーポンGETできるよ！（1回限り）🎁`;
+}
+
 export async function shareCurrentPage(customShareLabel?: string) {
   const store = getLiffSessionStore();
 
@@ -123,9 +134,8 @@ export async function shareCurrentPage(customShareLabel?: string) {
     }
 
     const shareUrl = buildShareUrl(store.userId);
-    const shareText = customShareLabel
-      ? `${customShareLabel}\n${SHARE_TEXT_PREFIX} ${shareUrl}`
-      : `${SHARE_TEXT_PREFIX} ${shareUrl}`;
+    const typeLabel = customShareLabel?.trim() || DEFAULT_SHARE_TYPE_LABEL;
+    const shareText = buildShareMessage(typeLabel, shareUrl);
 
     if (!liff.isApiAvailable("shareTargetPicker")) {
       toast.error(SHARE_UNAVAILABLE_ERROR_MESSAGE);
@@ -142,7 +152,9 @@ export async function shareCurrentPage(customShareLabel?: string) {
     return true;
   } catch (error) {
     console.error("[LIFF share] shareCurrentPage failed", error);
-    toast.error(store.userId ? SHARE_ERROR_MESSAGE : PROFILE_FETCH_ERROR_MESSAGE);
+    toast.error(
+      store.userId ? SHARE_ERROR_MESSAGE : PROFILE_FETCH_ERROR_MESSAGE,
+    );
     return false;
   }
 }

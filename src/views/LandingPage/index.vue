@@ -28,7 +28,6 @@ import ButtonTwo from "../../components/assets/ButtonTwo.vue";
 import Passport from "../../components/assets/Passport.vue";
 import Camera from "../../components/assets/Camera.vue";
 import LandingFaqSection from "./components/LandingFaqSection.vue";
-import { shareCurrentPage } from "../../services/liffShare";
 import { confirmLineShareReward } from "../../services/lineShareRewardApi";
 import { useLiffSessionStore } from "@/stores/liffSession";
 
@@ -47,7 +46,7 @@ const mbtiTypeCards = [
 ];
 
 function handleShareClick() {
-  void shareCurrentPage();
+  void router.push({ name: "quiz" });
 }
 
 async function confirmShareRewardIfNeeded() {
