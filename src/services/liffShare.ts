@@ -118,7 +118,7 @@ export function buildShareUrl(userId: string) {
 }
 
 function buildShareMessage(typeLabel: string, shareUrl: string) {
-  return `私のMBTIは「${typeLabel}」✈️
+  return `私の旅タイプは「${typeLabel}」✈️
 あなたのタイプも診断してみて👇
 ${shareUrl}
 このリンクから診断した方限定で、10％OFFクーポンGETできるよ！（1回限り）🎁`;
