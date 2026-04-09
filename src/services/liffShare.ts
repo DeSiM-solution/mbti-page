@@ -2,6 +2,7 @@ import liff from "@line/liff";
 import { toast } from "vue-sonner";
 import { pinia } from "@/stores";
 import { useLiffSessionStore } from "@/stores/liffSession";
+import { notifyLineShareCompleted } from "./lineShareRewardApi";
 
 const PROFILE_FETCH_ERROR_MESSAGE =
   "LINEプロフィールの取得に失敗しました。もう一度お試しください。";
@@ -148,6 +149,16 @@ export async function shareCurrentPage(customShareLabel?: string) {
         text: shareText,
       },
     ]);
+
+    try {
+      await notifyLineShareCompleted({
+        sharerUserId: store.userId,
+        shareLabel: typeLabel,
+        shareUrl,
+      });
+    } catch (error) {
+      console.error("[LIFF share] notifyLineShareCompleted failed", error);
+    }
 
     return true;
   } catch (error) {

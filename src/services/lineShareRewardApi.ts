@@ -24,6 +24,12 @@ type ConfirmLineShareRewardPayload = {
   inviteeUserId: string;
 };
 
+type NotifyLineShareCompletedPayload = {
+  sharerUserId: string;
+  shareLabel: string;
+  shareUrl: string;
+};
+
 export type ConfirmLineShareRewardResponse = {
   shareRecorded: boolean;
   successShareCount: number;
@@ -43,6 +49,12 @@ export type LineShareRewardStatusResponse = {
   expired: boolean;
   productGroupId: number | null;
   productGroupName: string | null;
+};
+
+export type NotifyLineShareCompletedResponse = {
+  sharerUserId: string;
+  notified: boolean;
+  messageId: string | null;
 };
 
 function unwrapResponse<T>(response: ApiEnvelope<T>) {
@@ -65,6 +77,15 @@ export async function saveLineShareTestResult(payload: SaveLineShareTestResultPa
 export async function confirmLineShareReward(payload: ConfirmLineShareRewardPayload) {
   const { data } = await apiClient.post<ApiEnvelope<ConfirmLineShareRewardResponse>>(
     "/business/lineShareReward/confirm",
+    payload,
+  );
+
+  return unwrapResponse(data);
+}
+
+export async function notifyLineShareCompleted(payload: NotifyLineShareCompletedPayload) {
+  const { data } = await apiClient.post<ApiEnvelope<NotifyLineShareCompletedResponse>>(
+    "/business/lineShareReward/shareComplete",
     payload,
   );
 
