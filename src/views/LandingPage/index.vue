@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import ButtonOne from "../../components/assets/ButtonOne.vue";
@@ -34,6 +34,8 @@ import { useLiffSessionStore } from "@/stores/liffSession";
 const router = useRouter();
 const liffSessionStore = useLiffSessionStore();
 const slashMarks = Array.from({ length: 26 }, (_, index) => index);
+const showShareEntryDialog = ref(false);
+const OFFICIAL_LINE_URL = "https://line.me/R/ti/p/@465zpfpf";
 const SHARE_RECEIVED_MESSAGE = "シェア特典の受け取りが完了しました。";
 const SHARE_REWARD_ERROR_MESSAGE = "シェア特典の受け取りに失敗しました。";
 const mbtiTypeCards = [
@@ -47,6 +49,10 @@ const mbtiTypeCards = [
 
 function handleShareClick() {
   void router.push({ name: "quiz" });
+}
+
+function closeShareEntryDialog() {
+  showShareEntryDialog.value = false;
 }
 
 async function confirmShareRewardIfNeeded() {
@@ -78,12 +84,42 @@ async function confirmShareRewardIfNeeded() {
 }
 
 onMounted(() => {
+  if (liffSessionStore.refereeUserId) {
+    showShareEntryDialog.value = true;
+  }
+
   void confirmShareRewardIfNeeded();
 });
 </script>
 
 <template>
   <div class="page">
+    <div
+      v-if="showShareEntryDialog"
+      class="share-entry-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-entry-dialog-title"
+    >
+      <div class="share-entry-dialog__backdrop" @click="closeShareEntryDialog"></div>
+      <div class="share-entry-dialog__panel">
+        <button class="share-entry-dialog__close" type="button" aria-label="閉じる" @click="closeShareEntryDialog">
+          ×
+        </button>
+        <h2 id="share-entry-dialog-title" class="share-entry-dialog__title">ご案内</h2>
+        <p class="share-entry-dialog__text">
+          特典のお受け取り、診断には事前にLINEの友達登録が必要です。<br />
+          公式LINE：
+          <a :href="OFFICIAL_LINE_URL" target="_blank" rel="noopener noreferrer">
+            {{ OFFICIAL_LINE_URL }}
+          </a>
+        </p>
+        <button class="share-entry-dialog__button" type="button" @click="closeShareEntryDialog">
+          閉じる
+        </button>
+      </div>
+    </div>
+
     <section class="hero">
       <button class="hero-cta" type="button" aria-label="旅タイプ診断" @click="router.push({ name: 'quiz' })">
         <ButtonOne width="325" height="55" aria-hidden="true" />
@@ -403,6 +439,86 @@ onMounted(() => {
 .page {
   padding: 0 0 40px;
   background: #fff;
+}
+
+.share-entry-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.share-entry-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.share-entry-dialog__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 360px);
+  padding: 28px 20px 20px;
+  border: 2px solid #111;
+  border-radius: 20px;
+  background: #fffdf7;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.share-entry-dialog__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.share-entry-dialog__title {
+  margin: 0 0 12px;
+  color: #111;
+  font-family: "BIZ UDPGothic", "Noto Sans JP", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.share-entry-dialog__text {
+  margin: 0;
+  color: #333;
+  font-family: "M PLUS 1", "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.share-entry-dialog__text a {
+  color: #1273ea;
+  text-decoration: underline;
+}
+
+.share-entry-dialog__button {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-family: "BIZ UDPGothic", "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 14px 16px;
+  cursor: pointer;
 }
 
 .hero {
